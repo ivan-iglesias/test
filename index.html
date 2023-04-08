@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>Test</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <main>
+    <section>
+      <div id="content"></div>
+    </section>
+  </main>
+
+  <script>
+    //const file = 'https://api.github.com/repos/ivan-iglesias/101-vue-3/contents/README.md';
+    const file = 'doc/test.md';
+
+    // if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    //   console.log("Estás ejecutando en local");
+    // } else {
+    //   console.log("Estás ejecutando en un servidor web");
+    // }
+
+    async function getLocalContent() {
+      console.log('Local content');
+      const response = await fetch(file);
+      return await response.text();
+    }
+
+    async function getRemoteContent() {
+      console.log('Remote content');
+      const response = await fetch(file);
+      const data = await response.json();
+      return atob(data.content);
+    }
+
+    (async function() {
+      const content = await getLocalContent();
+      document.getElementById('content').innerHTML = marked.parse(content);
+    })();
+
+
+    // let hola = fetch(file)
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     document.getElementById('content').innerHTML = marked.parse(atob(data.content));
+    //   })
+    //   .catch(error => console.log(error));
+
+
+    </script>
+</body>
+</html>
