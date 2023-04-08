@@ -3,9 +3,32 @@
 <head>
   <title>Test</title>
 
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      padding: .5rem;
+    }
+
+  </style>
+
+  <link rel="stylesheet" href="retro.css">
+
+  <link rel="stylesheet" href="prism.css">
 </head>
 <body>
+
+  <aside>
+    <ul id="lista"></ul>
+  </aside>
 
   <main>
     <section>
@@ -13,36 +36,81 @@
     </section>
   </main>
 
+  <script src="prism.js"></script>
+
   <script>
-    //const file = 'https://api.github.com/repos/ivan-iglesias/101-vue-3/contents/README.md';
-    const file = 'doc/test.md';
 
-    // if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-    //   console.log("Estás ejecutando en local");
-    // } else {
-    //   console.log("Estás ejecutando en un servidor web");
-    // }
+    function getFileName(fileName) {
+      fileName = fileName.substring(fileName.lastIndexOf('/')+1);
+      return fileName.split('.').slice(0, -1).join('.');
+    }
 
-    async function getLocalContent() {
-      console.log('Local content');
+    async function getFiles() {
+      const response = await fetch('doc/index.json');
+      return await response.json();
+    }
+
+    async function getFileContent(file) {
       const response = await fetch(file);
       return await response.text();
     }
 
-    async function getRemoteContent() {
-      console.log('Remote content');
-      const response = await fetch(file);
-      const data = await response.json();
-      return atob(data.content);
-    }
-
     (async function() {
-      const content = await getLocalContent();
-      document.getElementById('content').innerHTML = marked.parse(content);
+
+      // Create file index
+      const links = Array.from(await getFiles()).map((file) => {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = getFileName(file.path);
+        link.onclick = function(event) {
+          event.preventDefault();
+          (async function() {
+            const content = await getFileContent(file.path);
+            document.getElementById('content').innerHTML = marked.parse(content);
+
+
+            const codeElements = document.querySelectorAll('code.language-php');
+            codeElements.forEach((codeElement) => {
+              Prism.highlightElement(codeElement);
+            });
+
+
+
+          })();
+        };
+
+        return link;
+      });
+
+      const itemList = document.getElementById('lista');
+      links.forEach(link => {
+        const item = document.createElement('li');
+        item.appendChild(link);
+        itemList.appendChild(item);
+      });
+
+
+
+
+      // document.getElementsByTagName('aside')[0].innerHTML = 'hola¡';
     })();
 
 
-    // let hola = fetch(file)
+
+
+    // const file = 'doc/PHP/PHPUnit Mock.md';
+
+    // async function getLocalContent() {
+    //   const response = await fetch(file);
+    //   return await response.text();
+    // }
+
+    // (async function() {
+    //   const content = await getLocalContent();
+    //   document.getElementById('content').innerHTML = marked.parse(content);
+    // })();
+
+    // fetch(file)
     //   .then(response => response.json())
     //   .then(data => {
     //     document.getElementById('content').innerHTML = marked.parse(atob(data.content));
